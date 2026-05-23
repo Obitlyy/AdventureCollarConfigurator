@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="salmon">
+  <defs>
+    <linearGradient id="warm" x1="16" y1="16" x2="112" y2="112"><stop stop-color="#ffd166"/><stop offset="1" stop-color="#ef476f"/></linearGradient>
+    <linearGradient id="cool" x1="16" y1="112" x2="112" y2="16"><stop stop-color="#4cc9f0"/><stop offset="1" stop-color="#2d6a4f"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4f1de"/><stop offset="1" stop-color="#8d99ae"/></linearGradient>
+    
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="0" fill="#f8fbf9"/>
+  <g filter="">
+    <rect x="26" y="54" width="58" height="28" fill="#ef476f"/><rect x="82" y="58" width="20" height="20" fill="#f4a261"/><rect x="16" y="62" width="16" height="12" fill="#ef476f"/><rect x="94" y="50" width="10" height="12" fill="#1d3557"/><rect x="94" y="76" width="10" height="12" fill="#1d3557"/>
+  </g>
+</svg>
