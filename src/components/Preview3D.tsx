@@ -1,6 +1,6 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { DoubleSide, TextureLoader } from "three";
 import { useLoader } from "@react-three/fiber";
@@ -24,7 +24,7 @@ export function Preview3D({ state, stickers }: Preview3DProps) {
   return (
     <section className="preview-3d" aria-label="3D collar preview">
       <Canvas camera={{ position: [0, radius * SCENE_SCALE * 2.5, radius * SCENE_SCALE * 4], fov: 42 }} shadows>
-        <color attach="background" args={["#eef4f0"]} />
+        <SceneBackground />
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 8, 5]} intensity={1.4} castShadow />
         <directionalLight position={[-4, 3, -4]} intensity={0.3} />
@@ -67,6 +67,27 @@ export function Preview3D({ state, stickers }: Preview3DProps) {
       </Canvas>
     </section>
   );
+}
+
+/**
+ * Reactive scene background that follows the current theme.
+ */
+function SceneBackground() {
+  const [color, setColor] = useState(() =>
+    document.documentElement.getAttribute("data-theme") === "dark" ? "#0f1513" : "#f8f5ef"
+  );
+
+  useEffect(() => {
+    const update = () => {
+      const theme = document.documentElement.getAttribute("data-theme");
+      setColor(theme === "dark" ? "#0f1513" : "#f8f5ef");
+    };
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return <color attach="background" args={[color]} />;
 }
 
 /**

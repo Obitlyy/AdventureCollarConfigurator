@@ -1,4 +1,4 @@
-import { FileJson, PawPrint } from "lucide-react";
+import { FileJson, Moon, PawPrint, Sun } from "lucide-react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { fetchDesign, fetchStickers, saveDesign, validatePrice } from "./api/client";
 import { BaseControls } from "./components/BaseControls";
@@ -16,6 +16,18 @@ export function App() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("Ready");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("collar-theme");
+    if (saved === "light" || saved === "dark") return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("collar-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
   const pricing = selectPricingBreakdown(state);
   const payload = selectConfigurationPayload(state);
   const visibleStickers = useMemo(() => {
@@ -100,13 +112,31 @@ export function App() {
           <p className="eyebrow">Trailborn Custom Collars</p>
           <h1>Adventure Collar Configurator</h1>
         </div>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={toggleTheme}
+          title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          aria-label="Toggle theme"
+        >
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
         <div className="header-price">
           <span>Total</span>
           <strong>${pricing.total.toFixed(2)}</strong>
         </div>
       </header>
 
-      <section className="configurator-layout">
+      <section className="configurator-grid">
+        <BaseControls
+          state={state}
+          pricing={pricing}
+          onDispatch={dispatch}
+          onSave={handleSave}
+          isSaving={isSaving}
+          shareUrl={shareUrl}
+        />
+
         <section className="canvas-panel">
           <div className="canvas-topbar">
             <div>
@@ -123,22 +153,13 @@ export function App() {
           )}
         </section>
 
-        <BaseControls
+        <StickerLibrary
           state={state}
-          pricing={pricing}
+          stickers={visibleStickers}
           onDispatch={dispatch}
-          onSave={handleSave}
-          isSaving={isSaving}
-          shareUrl={shareUrl}
+          onQuickAdd={handleQuickAdd}
         />
       </section>
-
-      <StickerLibrary
-        state={state}
-        stickers={visibleStickers}
-        onDispatch={dispatch}
-        onQuickAdd={handleQuickAdd}
-      />
 
       <details className="payload-drawer">
         <summary>

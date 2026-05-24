@@ -33,8 +33,9 @@ export function FlatCollarCanvas({ state, stickers, onDispatch }: FlatCollarCanv
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
   const [isPanning, setIsPanning] = useState(false);
-  const panStart = useRef({ x: 0, startPanX: 0 });
+  const panStart = useRef({ x: 0, y: 0, startPanX: 0, startPanY: 0 });
 
   const selectedSticker = state.placedStickers.find(
     (sticker) => sticker.instanceId === state.selectedInstanceId
@@ -42,10 +43,13 @@ export function FlatCollarCanvas({ state, stickers, onDispatch }: FlatCollarCanv
 
   const aspectRatio = getCollarAspectRatio(state.baseCollar.size, state.baseCollar.thickness);
 
-  // The collar height is fixed; width = height * aspectRatio * zoom
-  const COLLAR_HEIGHT = 120;
-  const collarWidth = COLLAR_HEIGHT * aspectRatio * zoom;
-  const collarHeightScaled = COLLAR_HEIGHT * zoom;
+  // In horizontal mode: width is the long side. In vertical mode: height is the long side.
+  const isVertical = state.flatLayout === "vertical";
+  const SHORT_SIDE = 120;
+  const longSide = SHORT_SIDE * aspectRatio * zoom;
+  const shortSide = SHORT_SIDE * zoom;
+  const collarWidth = isVertical ? shortSide : longSide;
+  const collarHeightScaled = isVertical ? longSide : shortSide;
 
   useEffect(() => {
     if (!bandRef.current) {
@@ -62,6 +66,12 @@ export function FlatCollarCanvas({ state, stickers, onDispatch }: FlatCollarCanv
     observer.observe(bandRef.current);
     return () => observer.disconnect();
   }, []);
+
+  // Reset pan when layout changes
+  useEffect(() => {
+    setPanX(0);
+    setPanY(0);
+  }, [state.flatLayout]);
 
   // Wheel zoom
   useEffect(() => {
@@ -84,7 +94,9 @@ export function FlatCollarCanvas({ state, stickers, onDispatch }: FlatCollarCanv
 
     const handleMove = (e: PointerEvent) => {
       const dx = e.clientX - panStart.current.x;
+      const dy = e.clientY - panStart.current.y;
       setPanX(panStart.current.startPanX + dx);
+      setPanY(panStart.current.startPanY + dy);
     };
 
     const handleUp = () => {
@@ -226,7 +238,7 @@ export function FlatCollarCanvas({ state, stickers, onDispatch }: FlatCollarCanv
     if (event.target === event.currentTarget || (event.target as HTMLElement).closest(".collar-band") === bandRef.current && !(event.target as HTMLElement).closest(".placed-sticker")) {
       onDispatch({ type: "select-sticker", instanceId: null });
       setIsPanning(true);
-      panStart.current = { x: event.clientX, startPanX: panX };
+      panStart.current = { x: event.clientX, y: event.clientY, startPanX: panX, startPanY: panY };
     }
   };
 
@@ -244,7 +256,7 @@ export function FlatCollarCanvas({ state, stickers, onDispatch }: FlatCollarCanv
           backgroundColor: state.baseCollar.colorCode,
           width: `${collarWidth}px`,
           height: `${collarHeightScaled}px`,
-          transform: `translateX(${panX}px)`,
+          transform: `translate(${panX}px, ${panY}px)`,
           flexShrink: 0
         }}
         onDragOver={(event) => {
