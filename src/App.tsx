@@ -1,4 +1,4 @@
-import { FileJson, Moon, PawPrint, Sun } from "lucide-react";
+import { ArrowLeftRight, FileJson, Moon, PawPrint, PanelTop, Sun } from "lucide-react";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { fetchDesign, fetchStickers, saveDesign, validatePrice } from "./api/client";
 import { BaseControls } from "./components/BaseControls";
@@ -16,6 +16,8 @@ export function App() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("Ready");
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const [panelsReversed, setPanelsReversed] = useState(false); // Canvas/Stickers 左右互换
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const saved = localStorage.getItem("collar-theme");
     if (saved === "light" || saved === "dark") return saved;
@@ -30,6 +32,10 @@ export function App() {
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
   const pricing = selectPricingBreakdown(state);
   const payload = selectConfigurationPayload(state);
+
+  // 竖的模式 = 两栏布局
+  const isVerticalMode = state.flatLayout === "vertical";
+
   const visibleStickers = useMemo(() => {
     const normalizedQuery = state.filters.query.trim().toLowerCase();
 
@@ -127,15 +133,74 @@ export function App() {
         </div>
       </header>
 
-      <section className="configurator-grid">
-        <BaseControls
-          state={state}
-          pricing={pricing}
-          onDispatch={dispatch}
-          onSave={handleSave}
-          isSaving={isSaving}
-          shareUrl={shareUrl}
-        />
+      {/* 移动端快捷工具栏 */}
+      <div className="mobile-toolbar">
+        <button
+          type="button"
+          className="toolbar-button"
+          onClick={() => setControlsOpen(true)}
+        >
+          <PanelTop size={18} />
+          Controls
+        </button>
+        <div className="toolbar-divider" />
+        <button
+          type="button"
+          className="toolbar-button"
+          data-active={state.viewMode === "flat-2d"}
+          onClick={() => dispatch({ type: "set-view-mode", viewMode: "flat-2d" })}
+        >
+          2D
+        </button>
+        <button
+          type="button"
+          className="toolbar-button"
+          data-active={state.viewMode === "preview-3d"}
+          onClick={() => dispatch({ type: "set-view-mode", viewMode: "preview-3d" })}
+        >
+          3D
+        </button>
+        {isVerticalMode && (
+          <>
+            <div className="toolbar-divider" />
+            <button
+              type="button"
+              className="toolbar-button"
+              onClick={() => setPanelsReversed(v => !v)}
+              title="Swap canvas and stickers"
+            >
+              <ArrowLeftRight size={18} />
+            </button>
+          </>
+        )}
+      </div>
+
+      <section className={`configurator-grid ${isVerticalMode ? 'vertical-split' : ''} ${panelsReversed ? 'reversed' : ''}`}>
+        {/* 竖着模式：Controls 在顶部横排 */}
+        {isVerticalMode ? (
+          <div className="top-controls">
+            <BaseControls
+              state={state}
+              pricing={pricing}
+              onDispatch={dispatch}
+              onSave={handleSave}
+              isSaving={isSaving}
+              shareUrl={shareUrl}
+            />
+          </div>
+        ) : (
+          /* 横着模式：Controls 在左侧 */
+          <div className="desktop-controls">
+            <BaseControls
+              state={state}
+              pricing={pricing}
+              onDispatch={dispatch}
+              onSave={handleSave}
+              isSaving={isSaving}
+              shareUrl={shareUrl}
+            />
+          </div>
+        )}
 
         <section className="canvas-panel">
           <div className="canvas-topbar">
@@ -143,6 +208,17 @@ export function App() {
               <p className="eyebrow">{state.viewMode === "flat-2d" ? "2D Editor" : "3D Preview"}</p>
               <h2>{state.viewMode === "flat-2d" ? "Flat Collar Layout" : "Closed Ring Preview"}</h2>
             </div>
+            {/* 竖着模式下：交换按钮 */}
+            {isVerticalMode && (
+              <button
+                type="button"
+                className="icon-button-sm"
+                onClick={() => setPanelsReversed(v => !v)}
+                title="Swap canvas and stickers"
+              >
+                <ArrowLeftRight size={16} />
+              </button>
+            )}
             <span className="status-pill">{saveMessage}</span>
           </div>
 
@@ -161,13 +237,45 @@ export function App() {
         />
       </section>
 
-      <details className="payload-drawer">
+      {/* 移动端抽屉 */}
+      {controlsOpen && (
+        <div className="mobile-drawer-overlay" onClick={() => setControlsOpen(false)}>
+          <div className="mobile-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-handle-bar">
+              <div className="drawer-handle" />
+            </div>
+            <div className="drawer-header">
+              <h2>Collar Settings</h2>
+              <button
+                type="button"
+                className="drawer-close"
+                onClick={() => setControlsOpen(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="drawer-content">
+              <BaseControls
+                state={state}
+                pricing={pricing}
+                onDispatch={dispatch}
+                onSave={handleSave}
+                isSaving={isSaving}
+                shareUrl={shareUrl}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* <details className="payload-drawer">
         <summary>
           <FileJson size={17} aria-hidden="true" />
           Manufacturing JSON
         </summary>
         <pre>{JSON.stringify(payload, null, 2)}</pre>
-      </details>
+      </details> */}
     </main>
   );
 }
