@@ -208,17 +208,6 @@ export function App() {
               <p className="eyebrow">{state.viewMode === "flat-2d" ? "2D Editor" : "3D Preview"}</p>
               <h2>{state.viewMode === "flat-2d" ? "Flat Collar Layout" : "Closed Ring Preview"}</h2>
             </div>
-            {/* 竖着模式下：交换按钮 */}
-            {isVerticalMode && (
-              <button
-                type="button"
-                className="icon-button-sm"
-                onClick={() => setPanelsReversed(v => !v)}
-                title="Swap canvas and stickers"
-              >
-                <ArrowLeftRight size={16} />
-              </button>
-            )}
             <span className="status-pill">{saveMessage}</span>
           </div>
 

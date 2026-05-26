@@ -1100,7 +1100,8 @@ button[data-selected="true"]:hover {
 .configurator-grid.vertical-split {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto 1fr;
-  gap: 16px;
+  gap: 12px;
+  min-height: 0;
 }
 
 .configurator-grid.vertical-split .top-controls {
@@ -1110,19 +1111,21 @@ button[data-selected="true"]:hover {
 
 .configurator-grid.vertical-split .top-controls .control-panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 12px;
 }
 
 .configurator-grid.vertical-split .canvas-panel {
   grid-column: 1;
   grid-row: 2;
+  min-width: 0;
 }
 
 .configurator-grid.vertical-split .library-panel {
   grid-column: 2;
   grid-row: 2;
+  min-width: 0;
 }
 
 /* 反转左右顺序 */
@@ -1134,33 +1137,56 @@ button[data-selected="true"]:hover {
   grid-column: 1;
 }
 
-/* 移动端：垂直布局变为上下堆叠 */
+/* 移动端：保持两栏，隐藏顶部控制栏 */
 @media (max-width: 860px) {
   .configurator-grid.vertical-split {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    min-height: 0;
   }
 
   .configurator-grid.vertical-split .top-controls {
-    display: none; /* 移动端隐藏顶部控制栏，使用抽屉 */
+    display: none; /* 移动端用抽屉 */
   }
 
   .configurator-grid.vertical-split .canvas-panel {
     grid-column: 1;
     grid-row: 1;
+    min-width: 0;
+    min-height: 0;
   }
 
   .configurator-grid.vertical-split .library-panel {
-    grid-column: 1;
-    grid-row: 2;
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    min-height: 0;
   }
 
   .configurator-grid.vertical-split.reversed .canvas-panel {
-    grid-row: 2;
+    grid-column: 2;
   }
 
   .configurator-grid.vertical-split.reversed .library-panel {
-    grid-row: 1;
+    grid-column: 1;
+  }
+
+  .configurator-grid.vertical-split .canvas-panel .canvas-topbar h2,
+  .configurator-grid.vertical-split .canvas-panel .canvas-topbar .eyebrow {
+    font-size: 12px;
+  }
+
+  .configurator-grid.vertical-split .library-panel .library-header h2 {
+    font-size: 13px;
+  }
+
+  .configurator-grid.vertical-split .library-panel .sticker-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .configurator-grid.vertical-split .canvas-stage,
+  .configurator-grid.vertical-split .preview-3d {
+    min-height: 200px;
   }
 }
 
