@@ -1122,6 +1122,11 @@ button[data-selected="true"]:hover {
   min-width: 0;
 }
 
+.configurator-grid.vertical-split .canvas-stage {
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
 .configurator-grid.vertical-split .library-panel {
   grid-column: 2;
   grid-row: 2;
@@ -1187,6 +1192,11 @@ button[data-selected="true"]:hover {
   .configurator-grid.vertical-split .canvas-stage,
   .configurator-grid.vertical-split .preview-3d {
     min-height: 200px;
+  }
+
+  .configurator-grid.vertical-split .canvas-stage {
+    align-items: flex-start;
+    overflow-y: auto;
   }
 }
 
